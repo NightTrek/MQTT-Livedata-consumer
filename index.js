@@ -1,10 +1,12 @@
+#!/usr/bin/env node
+
 const express = require('express')
 var admin = require("firebase-admin");
 
 const mqtt = require('./MQTT.js');
 const S = require('./sessioncontroller');
 const app = express()
-const port = 3000;
+const port = 1420;
 
 
 var serviceAccount = require("./agroFireBaseAdmin.json");
@@ -28,8 +30,8 @@ let GlobalTopicSubscriptionList = {
     ///"AgroOffice1/data/Live": 1241516
 }
 
-let prevLiveData={};
-let prev30minHistory={};
+let prevLiveData = {};
+let prev30minHistory = {};
 
 mqtt.createMqttClient().then((mqttClient) => {
 
@@ -41,11 +43,15 @@ mqtt.createMqttClient().then((mqttClient) => {
 
     //api to test if server is up
     app.get('/ping', (req, res) => {
+        res.set('Access-Control-Allow-Methods', '*');
+        res.set('Access-Control-Allow-Headers', '*');
         res.send('DMZ-connector-ping \n ')
     })
 
     //this is called when the app logs in to smart grow This opens subscriptions to every deviceID and caches the historical data in deviceSubs
     app.post('/api/session', async (req, res) => {
+        res.set('Access-Control-Allow-Methods', '*');
+        res.set('Access-Control-Allow-Headers', '*');
         let { UID, deviceIDList } = req.body;
         //look for valid session in firebase
         if (!UID || !deviceIDList) {
@@ -177,18 +183,18 @@ mqtt.createMqttClient().then((mqttClient) => {
         //parse the topic and upload to the correct firebase document
         let topicParts = msg.topic.split('/')
         //update firestore with the new data.
-        switch(topicParts[2]){
+        switch (topicParts[2]) {
             case "Live":
                 //upload live data to
                 let LiveDataRef = db.collection("Rooms").doc(topicParts[0]).collection("Live").doc('LiveData');
                 let output = {
-                    temp:msg.msg.main.temp,
-                    rh:msg.msg.main.humidity,
-                    co2:msg.msg.main.pressure + Math.floor(Math.random()*2000),
-                    vpd:msg.msg.main.pressure,
+                    temp: msg.msg.main.temp,
+                    rh: msg.msg.main.humidity,
+                    co2: msg.msg.main.pressure + Math.floor(Math.random() * 2000),
+                    vpd: msg.msg.main.pressure,
                 }
-                
-                if(msg.msg !== prevLiveData){
+
+                if (msg.msg !== prevLiveData) {
                     console.log('updating live data');
                     prevLiveData = msg.msg;
                     S.updateLiveData(db, LiveDataRef, output);
@@ -197,15 +203,15 @@ mqtt.createMqttClient().then((mqttClient) => {
             case "History":
                 //upload history object
                 let min30Ref = db.collection("Rooms").doc(topicParts[0]).collection('History').doc("30Min");
-                if(msg.msg !== prev30minHistory){
+                if (msg.msg !== prev30minHistory) {
                     console.log('updating history in db');
                     S.updateHistory(db, min30Ref, msg.msg);
-                    prev30minHistory=msg.msg;
+                    prev30minHistory = msg.msg;
                 }
                 break;
         }
 
-        if(GlobalTopicSubscriptionList[msg.topic] < Math.floor(Date.now() / 1000)){
+        if (GlobalTopicSubscriptionList[msg.topic] < Math.floor(Date.now() / 1000)) {
             console.log('removing expired sub')
             mqtt.removeSubs(mqttClient, msg.topic)
         }
