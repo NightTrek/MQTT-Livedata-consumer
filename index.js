@@ -1,10 +1,11 @@
+#!/usr/bin/env node
 const express = require('express')
 var admin = require("firebase-admin");
 
 const mqtt = require('./MQTT.js');
 const S = require('./sessioncontroller');
 const app = express()
-const port = 3000;
+const port = 1420;
 
 
 var serviceAccount = require("./agroFireBaseAdmin.json");
