@@ -103,27 +103,33 @@ mqtt.createMqttClient().then((mqttClient) => {
                             }
 
                         } else {
-                            console.log('update session exp time')
+                            console.log('update session exp time') 
                             // update the session exp time 
                             try {
 
                                 let updatedExpirationSession = await S.updateSession(db, doc.id, doc.data().expTime);
-                                let topics = updatedExpirationSession.topics;
                                 // console.log(topics)
                                 //update the local expiration times. returns object with new subs and globalTopic object.
-                                let topicUpdater = S.updateTopics(GlobalTopicSubscriptionList, topics, updatedExpirationSession.expTime);
+                                let topicUpdater = S.updateTopics(GlobalTopicSubscriptionList, updatedExpirationSession.topics, updatedExpirationSession.expTime);
                                 GlobalTopicSubscriptionList = topicUpdater.newGlobalTopicsObject;
                                 console.log(GlobalTopicSubscriptionList);
-                                try {
-                                    //add the subscriptions 
-                                    let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
-
-                                    res.send({ sessionID: doc.id, granted: granted });
-                                } catch (err) {
-                                    //this is an MQTT error
-                                    console.log(err)
-                                    res.status(500).send(err)
+                                //check if there are new Topics to subscribe too. Ensure newSubs has more then 0 subscriptions otherwise cant create new subs.
+                                if(topicUpdater.newSubs && topicUpdater.newSubs.length>0){
+                                    try {
+                                        //add the subscriptions //new subs is undefined because there are no new topics to sub
+                                        let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
+    
+                                        res.send({ sessionID: doc.id, granted: granted });
+                                    } catch (err) {
+                                        //this is an MQTT error
+                                        console.log(err)
+                                        res.status(500).send(err)
+                                    }
+                                }else{
+                                    //there are new topics just updating the exp times.
+                                    res.send({ sessionID: doc.id, granted: updatedExpirationSession.topics });
                                 }
+                                
                             } catch (err) {
                                 //this is an error updating session
                                 console.log(err)

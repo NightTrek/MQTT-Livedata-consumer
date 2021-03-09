@@ -137,7 +137,7 @@ const createSub = (client, topicList) => {
         const subscriptionOptions = {
             rh: true
         }
-        if(!client || !topicList){
+        if(!client || !topicList || topicList.length < 1){
             reject({error:"client or topicList undefined"})
         }
         
