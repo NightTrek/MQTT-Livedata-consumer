@@ -82,21 +82,40 @@ const updateSession = async (db, clientSessionID, prevExpTime) => {
 }
 
 //takes a topic object and adds or updates the topic object with new expTimes and new topics
-const updateTopics = (originalTopics, newtopics, expTime) => {
-    let output = originalTopics;
-    let expiredTopics = [];
-    newtopics.forEach((item) => {
+const updateTopics = (GlobalTopicsList, oldSessionTopics, newDeviceIDList, expTime) => {
+    let output = GlobalTopicsList;
+    let expiredOrNewTopics = [];
+    //check if there are new topics that arent in the old Session
+    if(oldSessionTopics.length < newDeviceIDList.length*2){
+        //create old session topics object to reference
+        let DeviceIdObject = {};
+       oldSessionTopics.forEach((topic) => {
+           let deviceIDAndTopicArray = topic.split('/');
+            DeviceIdObject[deviceIDAndTopicArray[0]]=true;
+       })
+       console.log(DeviceIdObject);
+        newDeviceIDList.forEach((item) => {  
+            //if the device ID is not in the deviceID object add Live and History to oldSessionTopics
+            if(!DeviceIdObject[item]){
+                oldSessionTopics.push(item + "/data/Live");
+                oldSessionTopics.push(item + "/data/History");
+            }
+        })
+    }
+
+    //this function loops through each existing topic and updates the GlobalTopiclist and adds items to newTopicsList
+    oldSessionTopics.forEach((item) => {
         //here we check to see if the topic is expired and there for does not already have a subscription and will need to be subscribed
         // if the original topics is undefined its automatically added to sub list
-        if(!originalTopics[item] || originalTopics[item] < Math.floor(Date.now() / 1000) ){
-            expiredTopics.push(item);
+        if(!GlobalTopicsList[item] || GlobalTopicsList[item] < Math.floor(Date.now() / 1000) ){
+            expiredOrNewTopics.push(item);
         }
         output[item] = expTime;
         
     });
     // console.log(expiredTopics);
     return {
-        newSubs:expiredTopics,
+        newSubs:expiredOrNewTopics,
         newGlobalTopicsObject:output
     };
 }

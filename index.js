@@ -107,11 +107,11 @@ mqtt.createMqttClient().then((mqttClient) => {
                             try {
 
                                 let updatedExpirationSession = await S.updateSession(db, doc.id, doc.data().expTime);
-                                // console.log(topics)
+                                console.log(updatedExpirationSession)
                                 //update the local expiration times. returns object with new subs and globalTopic object.
-                                let topicUpdater = S.updateTopics(GlobalTopicSubscriptionList, updatedExpirationSession.topics, updatedExpirationSession.expTime);
+                                let topicUpdater = S.updateTopics(GlobalTopicSubscriptionList, updatedExpirationSession.topics, deviceIDList, updatedExpirationSession.expTime);
                                 GlobalTopicSubscriptionList = topicUpdater.newGlobalTopicsObject;
-                                console.log(GlobalTopicSubscriptionList);
+                                console.log(topicUpdater);
                                 //check if there are new Topics to subscribe too. Ensure newSubs has more then 0 subscriptions otherwise cant create new subs.
                                 if(topicUpdater.newSubs && topicUpdater.newSubs.length>0){
                                     try {
