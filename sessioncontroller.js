@@ -83,6 +83,9 @@ const updateSession = async (db, clientSessionID, prevExpTime) => {
 
 //takes a topic object and adds or updates the topic object with new expTimes and new topics
 const updateTopics = (GlobalTopicsList, oldSessionTopics, newDeviceIDList, expTime) => {
+    if(!GlobalTopicsList || !oldSessionTopics || !newDeviceIDList || !expTime){
+        return new Error("session controller Error: updateTopics missing one of its input arguments")
+    }
     let output = GlobalTopicsList;
     let expiredOrNewTopics = [];
     //check if there are new topics that arent in the old Session

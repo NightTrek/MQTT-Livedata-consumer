@@ -77,16 +77,17 @@ mqtt.createMqttClient().then((mqttClient) => {
                         //check if session is expired already
                         if (now > expTime) {
                             //create a new session since the last one expired
-                            console.log('session expired creating new session')
+                            console.log('session expired creating new session v1')
                             try {
                                 let session = await S.createNewSession(db, UID, deviceIDList);
                                 console.log(session)
                                 //here we are going to add the new topics to the subscriptions
-                                let topicUpdater = S.updateTopics(GlobalTopicSubscriptionList, session.topics, session.expTime);
+                                let topicUpdater = S.updateTopics(GlobalTopicSubscriptionList, session.topics, deviceIDList, session.expTime);
+                                console.log(topicUpdater)
                                 try {
                                     //add the subscriptions 
                                     let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
-
+                                    console.log(granted)
                                     console.log("successfully subscribed")
                                     res.send({ sessionID: doc.id,expTime:session.expTime, granted: granted });
                                 } catch (err) {
@@ -143,6 +144,7 @@ mqtt.createMqttClient().then((mqttClient) => {
 
             } else {
                 //create a new session here since none exist
+                console.log('session does not exist making new one')
                 try {
                     //create a new session
                     let session = await S.createNewSession(db, UID, deviceIDList);
