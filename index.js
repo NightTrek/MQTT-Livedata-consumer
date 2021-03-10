@@ -89,7 +89,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                                     let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
                                     console.log(granted)
                                     console.log("successfully subscribed")
-                                    res.send({ sessionID: doc.id,expTime:session.expTime, granted: granted });
+                                    res.send({ sessionID: doc.id,expTime:session.expTime, granted: topicUpdater.newSubs });
                                 } catch (err) {
                                     //this is an MQTT error
                                     console.log(err)
