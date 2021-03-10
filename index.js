@@ -88,7 +88,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                                     let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
 
                                     console.log("successfully subscribed")
-                                    res.send({ sessionID: doc.id, granted: granted });
+                                    res.send({ sessionID: doc.id,expTime:session.expTime, granted: granted });
                                 } catch (err) {
                                     //this is an MQTT error
                                     console.log(err)
@@ -118,7 +118,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                                         //add the subscriptions //new subs is undefined because there are no new topics to sub
                                         let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
     
-                                        res.send({ sessionID: doc.id, granted: granted });
+                                        res.send({ sessionID: doc.id, expTime:updatedExpirationSession.expTime, granted: granted });
                                     } catch (err) {
                                         //this is an MQTT error
                                         console.log(err)
@@ -126,7 +126,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                                     }
                                 }else{
                                     //there are new topics just updating the exp times.
-                                    res.send({ sessionID: doc.id, granted: updatedExpirationSession.topics });
+                                    res.send({ sessionID: doc.id, expTime:updatedExpirationSession.expTime, granted: updatedExpirationSession.topics });
                                 }
                                 
                             } catch (err) {
@@ -153,7 +153,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                         //add the subscriptions 
                         let granted = await mqtt.createSub(mqttClient, topicUpdater.newSubs);
                         console.log("successfully subscribed")
-                        res.send({ sessionID: session.id, granted: granted });
+                        res.send({ sessionID: session.id, expTime:session.expTime, granted: granted });
                     } catch (err) {
                         //this is an MQTT error
                         console.log(err)
