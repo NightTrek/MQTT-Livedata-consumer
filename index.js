@@ -38,29 +38,6 @@ mqtt.createMqttClient().then((mqttClient) => {
     //middleware
     app.use(express.json());
 
-   //get a list of rooms and subscribe to every alarm channel
-   db.collection('Rooms').get().then((querySnapshot) => {
-       let subscriptionList = [];
-    querySnapshot.forEach((item) => {
-        if(item.exists){
-            subscriptionList.push(`${item.id}/alarms/alarm`)
-        }
-    });
-    mqtt.createSub(mqttClient, subscriptionList).then((item) => {
-        console.log('subscribed to alarms')
-        if(item.length !== subscriptionList.length){
-            console.log('subscription error')
-        }
-    }).catch((err) => {
-        console.log('error subscribing to alarms')
-        console.log(err)
-    })
-
-   }).catch((err) => {
-       console.log(err);
-
-   })
-
     //routes
 
     //api to test if server is up
@@ -238,10 +215,6 @@ mqtt.createMqttClient().then((mqttClient) => {
                     S.updateHistory(db, min30Ref, msg.msg);
                     prev30minHistory = msg.msg;
                 }
-                break;
-            case "alarm":
-                let alarmRef = db.collection('Rooms').doc(topicParts[0]).collection('Alarms').doc();
-                S.AddAlarms(alarmRef, {unixTime: msg.msg[0].unixTime, activeAlarms: msg.msg});
                 break;
         }
 
