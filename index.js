@@ -10,6 +10,7 @@ const port = 1420;
 
 var serviceAccount = require("./agroFireBaseAdmin.json");
 
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://agromation-grow-room-control.firebaseio.com"
@@ -37,11 +38,28 @@ mqtt.createMqttClient().then((mqttClient) => {
     //middleware
     app.use(express.json());
 
-    // app.use(function(req, res, next) {
-    //     res.header("Access-Control-Allow-Origin", "https://us-central1-agromation-grow-room-control.cloudfunctions.net"); // update to match the domain you will make the request from
-    //     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    //     next();
-    //   });
+   //get a list of rooms and subscribe to every alarm channel
+   db.collection('Rooms').get().then((querySnapshot) => {
+       let subscriptionList = [];
+    querySnapshot.forEach((item) => {
+        if(item.exists){
+            subscriptionList.push(`${item.id}/alarms/alarm`)
+        }
+    });
+    mqtt.createSub(mqttClient, subscriptionList).then((item) => {
+        console.log('subscribed to alarms')
+        if(item.length !== subscriptionList.length){
+            console.log('subscription error')
+        }
+    }).catch((err) => {
+        console.log('error subscribing to alarms')
+        console.log(err)
+    })
+
+   }).catch((err) => {
+       console.log(err);
+
+   })
 
     //routes
 
@@ -220,6 +238,10 @@ mqtt.createMqttClient().then((mqttClient) => {
                     S.updateHistory(db, min30Ref, msg.msg);
                     prev30minHistory = msg.msg;
                 }
+                break;
+            case "alarm":
+                let alarmRef = db.collection('Rooms').doc(topicParts[0]).collection('Alarms').doc();
+                S.AddAlarms(alarmRef, {unixTime: msg.msg[0].unixTime, activeAlarms: msg.msg});
                 break;
         }
 
