@@ -180,6 +180,9 @@ mqtt.createMqttClient().then((mqttClient) => {
 
     })
 
+    const meh = ["ns=4;i=51", "ns=4;i=52", "ns=4;i=53", "ns=4;i=54", "ns=4;i=55", "ns=4;i=56", "ns=4;i=57", "ns=4;i=58", "ns=4;i=59",
+                 "ns=4;i=60", "ns=4;i=61", "ns=4;i=62", "ns=4;i=63", "ns=4;i=64", "ns=4;i=65", "ns=4;i=69", "ns=4;i=70", "ns=4;i=72", "ns=4;i=73", "ns=4;i=75", "ns=4;i=76"]
+
 
     // Express app initialization.
     app.listen(port, () => {
@@ -193,12 +196,15 @@ mqtt.createMqttClient().then((mqttClient) => {
         switch (topicParts[2]) {
             case "Live":
                 //upload live data to
-                let LiveDataRef = db.collection("Rooms").doc(topicParts[0]).collection("Live").doc('LiveData');
+                let LiveDataRef = db.collection("Rooms").doc(topicParts[0]); //.collection("Live").doc('LiveData');
                 let output = {
-                    temp: msg.msg.main.temp,
-                    rh: msg.msg.main.humidity,
-                    co2: msg.msg.main.pressure + Math.floor(Math.random() * 2000),
-                    vpd: msg.msg.main.pressure,
+                    temp: Math. round(100*msg.msg.main.temp)/100,
+                    rh: round(100*msg.msg.main.humidity)/100,
+                    co2: round(100*msg.msg.main.co2)/100,
+                    vpd: round(100*msg.msg.main.pressure)/100,
+                    ...options,
+                    ...OnOff
+
                 }
 
                 if (msg.msg !== prevLiveData) {
@@ -206,6 +212,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                     prevLiveData = msg.msg;
                     S.updateLiveData(db, LiveDataRef, output);
                 }
+                if( msg.msg.options)
                 break;
             case "History":
                 //upload history object
@@ -228,4 +235,3 @@ mqtt.createMqttClient().then((mqttClient) => {
 }).catch((err) => {
     console.log(err);
 });
-

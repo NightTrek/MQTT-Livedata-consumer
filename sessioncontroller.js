@@ -136,7 +136,7 @@ const updateLiveData = async (db, docRef, input) => {
                     throw new Error("Document does not exist")
                 }
                 let data = liveDataDoc.data();
-                if(data.temp == input.temp && data.rh == input.rh && data.co2 == input.co2 && data.vpd == input.vpd ){
+                if(data.temp == input.temp && data.rh == input.rh && data.co2 == input.co2 && data.vpd == input.vpd && data.tempSetPoint == input.tempSetPoint && data.CO2SetPoint == input.CO2SetPoint ){
                     console.log('no need to update live data')
                     return data;
                 }else{
