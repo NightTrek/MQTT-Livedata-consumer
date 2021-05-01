@@ -141,11 +141,13 @@ const updateLiveData = async (db, docRef, input) => {
                     console.log('no need to update live data')
                     return data;
                 }else{
+                    console.log('updating liveData here')
+                    console.log(input)
                     transaction.update(docRef, input);
                 }
          
             }).then((output) => {
-                console.log(output.co2)
+                console.log(output)
                 resolve(output)
     
             }).catch((err) => {
