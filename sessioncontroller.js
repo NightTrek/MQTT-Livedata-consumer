@@ -127,8 +127,9 @@ const updateTopics = (GlobalTopicsList, oldSessionTopics, newDeviceIDList, expTi
 const updateLiveData = async (db, docRef, input) => {
     // console.log('updating live data')
     return new Promise((resolve, reject) => {
-        if(!docRef || !input || !input.temp || !input.co2 || !input.pressure || !input.humidity){
-            throw new Error("missing inputs or docRef");
+        if(!docRef || !input || !input.temp || !input.co2 || !input.vpd || !input.rh){
+            console.log(input)
+            throw new Error("missing inputs or docRef in LiveData");
         }
         db.runTransaction((transaction) => {
             return transaction.get(docRef).then((liveDataDoc) => {
@@ -136,7 +137,37 @@ const updateLiveData = async (db, docRef, input) => {
                     throw new Error("Document does not exist")
                 }
                 let data = liveDataDoc.data();
-                if(data.temp == input.temp && data.humidity == input.humidity && data.co2 == input.co2 && data.pressure == input.pressure && data.tempSetPoint == input.tempSetPoint && data.CO2SetPoint == input.CO2SetPoint ){
+                if(data.temp == input.temp && data.rh == input.rh && data.co2 == input.co2 && data.vpd == input.vpd ){
+                    console.log('no need to update live data')
+                    return data;
+                }else{
+                    transaction.update(docRef, input);
+                }
+         
+            }).then((output) => {
+                resolve(output)
+    
+            }).catch((err) => {
+                console.log(err);
+                reject(err)
+            })
+        })
+    })  
+}
+
+const updateRoomData = async (db, docRef, input) => {
+    // console.log('updating live data')
+    return new Promise((resolve, reject) => {
+        if(!docRef || !input ){
+            throw new Error("missing inputs or docRef in RoomUpdate");
+        }
+        db.runTransaction((transaction) => {
+            return transaction.get(docRef).then((liveDataDoc) => {
+                if (!liveDataDoc.exists) {
+                    throw new Error("Document does not exist")
+                }
+                let data = liveDataDoc.data();
+                if(data.tempSetPoint == input.tempSetPoint && data.humiditySetPoint == input.humiditySetPoint && data.CO2SetPoint == input.CO2SetPoint && data.pressureSetPoint == input.pressureSetPoint ){
                     console.log('no need to update live data')
                     return data;
                 }else{
@@ -189,5 +220,6 @@ module.exports = {
     updateSession:updateSession,
     updateTopics:updateTopics,
     updateLiveData:updateLiveData,
+    updateRoomData:updateRoomData,
     updateHistory:updateHistory,
 }

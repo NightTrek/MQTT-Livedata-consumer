@@ -31,6 +31,7 @@ let GlobalTopicSubscriptionList = {
 }
 
 let prevLiveData = {};
+let prevRoomData = {};
 let prev30minHistory = {};
 
 mqtt.createMqttClient().then((mqttClient) => {
@@ -196,18 +197,29 @@ mqtt.createMqttClient().then((mqttClient) => {
         switch (topicParts[2]) {
             case "Live":
                 //upload live data to
-                let LiveDataRef = db.collection("Rooms").doc(topicParts[0]); //.collection("Live").doc('LiveData');
+                let LiveDataRef = db.collection("Rooms").doc(topicParts[0]).collection("Live").doc('LiveData');
+                let RoomRef = db.collection("Rooms").doc(topicParts[0]);
                 let output = {
-                    ...msg.msg.main,
-                    ...msg.msg.options,
-                    ...msg.msg.OnOff
+                    temp: msg.msg.main.temp,
+                    rh: msg.msg.main.humidity,
+                    co2: msg.msg.main.co2,
+                    vpd: msg.msg.main.pressure,
                 }
                 output.co2 = msg.msg.main.co2
-                
-                if (msg.msg !== prevLiveData) {
+
+                let RoomDataOut = {
+                    ...msg.msg.OnOff,
+                    ...msg.msg.options,
+
+                }
+                if (msg.msg !== prevLiveData[topicParts[0]]) {
                     console.log('updating live data');
-                    prevLiveData = msg.msg;
+                    prevLiveData[topicParts[0]] = msg.msg;
                     S.updateLiveData(db, LiveDataRef, output);
+                }
+                if(RoomDataOut !== prevRoomData[topicParts[0]]){
+                    prevRoomData[topicParts[0]] = RoomDataOut;
+                    S.updateRoomData(db, RoomRef, RoomDataOut);
                 }
                 break;
             case "History":
