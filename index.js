@@ -205,7 +205,6 @@ mqtt.createMqttClient().then((mqttClient) => {
                     co2: msg.msg.main.co2,
                     vpd: msg.msg.main.pressure,
                 }
-                output.co2 = msg.msg.main.co2
 
                 let RoomDataOut = {
                     ...msg.msg.OnOff,
@@ -215,6 +214,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                 if (msg.msg !== prevLiveData[topicParts[0]]) {
                     console.log('updating live data');
                     prevLiveData[topicParts[0]] = msg.msg;
+                    console.log(output)
                     S.updateLiveData(db, LiveDataRef, output);
                 }
                 if(RoomDataOut !== prevRoomData[topicParts[0]]){
