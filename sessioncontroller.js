@@ -127,7 +127,7 @@ const updateTopics = (GlobalTopicsList, oldSessionTopics, newDeviceIDList, expTi
 const updateLiveData = async (db, docRef, input) => {
     // console.log('updating live data')
     return new Promise((resolve, reject) => {
-        if(!docRef || !input || !input.temp || !input.co2 || !input.vpd || !input.rh){
+        if(!docRef || !input || !input.temp || !input.co2 || !input.pressure || !input.humidity){
             throw new Error("missing inputs or docRef");
         }
         db.runTransaction((transaction) => {
@@ -136,7 +136,7 @@ const updateLiveData = async (db, docRef, input) => {
                     throw new Error("Document does not exist")
                 }
                 let data = liveDataDoc.data();
-                if(data.temp == input.temp && data.rh == input.rh && data.co2 == input.co2 && data.vpd == input.vpd && data.tempSetPoint == input.tempSetPoint && data.CO2SetPoint == input.CO2SetPoint ){
+                if(data.temp == input.temp && data.humidity == input.humidity && data.co2 == input.co2 && data.pressure == input.pressure && data.tempSetPoint == input.tempSetPoint && data.CO2SetPoint == input.CO2SetPoint ){
                     console.log('no need to update live data')
                     return data;
                 }else{

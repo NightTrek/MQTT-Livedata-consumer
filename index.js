@@ -198,21 +198,17 @@ mqtt.createMqttClient().then((mqttClient) => {
                 //upload live data to
                 let LiveDataRef = db.collection("Rooms").doc(topicParts[0]); //.collection("Live").doc('LiveData');
                 let output = {
-                    temp: Math. round(100*msg.msg.main.temp)/100,
-                    rh: round(100*msg.msg.main.humidity)/100,
-                    co2: round(100*msg.msg.main.co2)/100,
-                    vpd: round(100*msg.msg.main.pressure)/100,
-                    ...options,
-                    ...OnOff
-
+                    ...msg.msg.main,
+                    ...msg.msg.options,
+                    ...msg.msg.OnOff
                 }
-
+                output.co2 = msg.msg.main.co2
+                
                 if (msg.msg !== prevLiveData) {
                     console.log('updating live data');
                     prevLiveData = msg.msg;
                     S.updateLiveData(db, LiveDataRef, output);
                 }
-                if( msg.msg.options)
                 break;
             case "History":
                 //upload history object
