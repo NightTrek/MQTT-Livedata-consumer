@@ -214,7 +214,7 @@ mqtt.createMqttClient().then((mqttClient) => {
                 if (msg.msg !== prevLiveData[topicParts[0]]) {
                     console.log('updating live data');
                     prevLiveData[topicParts[0]] = msg.msg;
-                    console.log(output)
+                    // console.log(output)
                     S.updateLiveData(db, LiveDataRef, output);
                 }
                 if(RoomDataOut !== prevRoomData[topicParts[0]]){
