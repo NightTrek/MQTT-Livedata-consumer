@@ -145,6 +145,7 @@ const updateLiveData = async (db, docRef, input) => {
                 }
          
             }).then((output) => {
+                console.log(output.co2)
                 resolve(output)
     
             }).catch((err) => {
